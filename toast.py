@@ -1,0 +1,41 @@
+import webbrowser
+from config import config
+
+from PyQt6.QtCore import Qt
+from pyqttoast import Toast as _Toast, ToastPreset
+
+_Toast.setMaximumOnScreen(5)
+
+class Toast:
+    def mail_info(self, title, message):
+        _toast = _Toast()
+        _toast.setTitle(title)
+        _toast.setText(message)
+        _toast.setDuration(20000)
+        _toast.mousePressEvent = lambda e, t=_toast: self.open_email(e, t)
+        _toast.applyPreset(ToastPreset.INFORMATION)
+        _toast.show()
+
+    def success(self, title, message):
+        _toast = _Toast()
+        _toast.setTitle(title)
+        _toast.setText(message)
+        _toast.setDuration(5000)
+        _toast.applyPreset(ToastPreset.SUCCESS)
+        _toast.show()
+
+    def warn(self, title, message):
+        _toast = _Toast()
+        _toast.setDuration(20000)
+        _toast.setTitle(title)
+        _toast.setText(message)
+        _toast.applyPreset(ToastPreset.WARNING)
+        _toast.show()
+
+    def open_email(self, e, _toast:_Toast):
+        if e.button() == Qt.MouseButton.LeftButton:
+            webbrowser.open(config.URL + config.END_POINT.MAIL)
+        _toast.close()
+
+
+toast = Toast()
