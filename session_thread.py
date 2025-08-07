@@ -1,11 +1,12 @@
 import json
 import requests
+import logging
 
 from PyQt6.QtCore import QThread, pyqtSignal, QTimer
 from bs4 import BeautifulSoup
 
+from config import config
 from user import User
-
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
@@ -44,8 +45,9 @@ class SessionThread(QThread):
         self.msg.emit(value)
 
     def run(self):
+        logging.debug("thread 시작..")
         self.monitor()
-        self.timer.start(60000)
+        self.timer.start(config.SESSION_CONFIG.AUTO_REFRESH_INTERVAL_SEC)
         self.exec_()  # 타이머 실행 대기
 
     def stop(self):
@@ -57,6 +59,7 @@ class SessionThread(QThread):
         
         
     def login(self):
+        logging.debug("로그인 시도 중..")
         payload = {'userId': self.username, 'userPw': self.password}
         response = self.session.post(self.login_url, data=payload)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -87,12 +90,15 @@ class SessionThread(QThread):
 
 
     def monitor(self):
+        logging.info("메일 모니터링 중..")
         is_first = True
         if self.message.status == "work" or is_first == True:
             try:
                 is_first = False
                 new_mails:list = self.get_new_email()
                 if len(new_mails) > 0:
+                    logging.info(f"신규 메일 {len(new_mails)} 건")
+                    logging.info(f"첫 메일 제목: {new_mails[0]["emailTitle"]}")
                     self.message = ToastRequest("work", f"신규 메일 {len(new_mails)} 건", f"제목: {new_mails[0]["emailTitle"]}")
             except Exception as e:
                 self.message = ToastRequest("error", "에러가 발생하여 모니터링이 종료됩니다.", f"에러: {e}")

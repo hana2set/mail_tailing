@@ -1,4 +1,6 @@
 import sys
+import logging
+
 from user import User
 
 from config import config
@@ -10,6 +12,15 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.uic import loadUi
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG,
+    handlers=[
+        logging.FileHandler('log.txt'),
+        logging.StreamHandler()
+    ]
+)
 
 class LoginDialog(QDialog):
 
