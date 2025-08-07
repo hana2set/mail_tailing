@@ -8,10 +8,18 @@ class EndPointConfig(BaseModel):
     INDEX: str
     MAIL_LIST: str
 
+class SessionConfig(BaseModel):
+    AUTO_REFRESH_INTERVAL_SEC: int
+    TOAST_MAIL_DURATION_SEC: int
+    TOAST_SUCCESS_DURATION_SEC: int
+    TOAST_WARN_DURATION_SEC: int
 
 class AppConfig(BaseModel):
     URL: str
     END_POINT: EndPointConfig
+    SESSION_CONFIG: SessionConfig
+
+
 
 def load_config(path: str = "config.json") -> AppConfig:
     import json
