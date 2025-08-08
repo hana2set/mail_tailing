@@ -94,7 +94,7 @@ class LoginDialog(QDialog):
         self.thread.msg.connect(self.thread_state_change)
         self.thread_state_change()
 
-        if self.thread.message.status == "ready":
+        if self.thread.status == "active":
             self.status_label.setText("🟢")
             self.thread.start()
 

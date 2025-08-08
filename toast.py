@@ -1,8 +1,10 @@
+import logging
 import webbrowser
-from config import config
 
 from PyQt6.QtCore import Qt
 from pyqttoast import Toast as _Toast, ToastPreset
+
+from config import config
 
 _Toast.setMaximumOnScreen(5)
 
@@ -15,6 +17,9 @@ class Toast:
         _toast.mousePressEvent = lambda e, t=_toast: self.open_email(e, t)
         _toast.applyPreset(ToastPreset.INFORMATION)
         _toast.show()
+
+        logging.info(title)
+        logging.info(message)
 
     def success(self, title, message):
         _toast = _Toast()
@@ -31,6 +36,9 @@ class Toast:
         _toast.setText(message)
         _toast.applyPreset(ToastPreset.WARNING)
         _toast.show()
+
+        logging.warning(title)
+        logging.warning(message)
 
     def open_email(self, e, _toast:_Toast):
         if e.button() == Qt.MouseButton.LeftButton:
