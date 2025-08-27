@@ -8,9 +8,10 @@ from toast import toast
 from session_thread import SessionThread
 
 from PyQt6.QtWidgets import (
-    QSystemTrayIcon, QMenu, QDialog, QApplication, QPushButton
+    QSystemTrayIcon, QMenu, QDialog, QApplication
 )
 from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtCore import QTimer, QTime, QDateTime
 from PyQt6.uic import loadUi
 
 logging.basicConfig(
@@ -39,24 +40,6 @@ class LoginDialog(QDialog):
 
         self.login_button.clicked.connect(self.login_toggle)
 
-    # def show(self):
-
-        # # 위치: 오른쪽 하단
-        # screen = QApplication.primaryScreen().availableGeometry()
-        # login.end_pos = QPoint(screen.right() - login.width() - 20, screen.bottom() - login.height() - 20)
-        # login.start_pos = QPoint(login.end_pos.x(), screen.bottom() + 100)
-        #
-        # login.move(login.start_pos)
-
-        # 애니메이션
-        # self.ui.anim = QPropertyAnimation(self.ui, b"geometry")
-        # self.ui.anim.setDuration(200)
-        # self.ui.anim.setStartValue(QRect(self.ui.start_pos, self.ui.size()))
-        # self.ui.anim.setEndValue(QRect(self.ui.end_pos, self.ui.size()))
-        # self.ui.anim.start()
-
-        # self.show()
-
     def login_toggle(self):
         if self.logged_in:
             # 로그아웃
@@ -83,20 +66,26 @@ class LoginDialog(QDialog):
         self.thread = None
 
     def run_monitor(self, user):
-        self.thread = SessionThread(
-            login_url=config.URL + config.END_POINT.LOGIN,
-            logout_url=config.URL + config.END_POINT.LOGOUT,
-            data_url=config.URL + config.END_POINT.MAIL_LIST + '?currentPage=1&viewRowCnt=' + '10' + '&sortField=RECEIVE_DT&sortType=DESC',
-            username=user.username,
-            password=user.password
-        )
 
-        self.thread.msg.connect(self.thread_state_change)
-        self.thread_state_change()
+        try:
+            self.thread = SessionThread(
+                login_url=config.URL + config.END_POINT.LOGIN,
+                logout_url=config.URL + config.END_POINT.LOGOUT,
+                data_url=config.URL + config.END_POINT.MAIL_LIST + '?currentPage=1&viewRowCnt=' + '10' + '&sortField=RECEIVE_DT&sortType=DESC',
+                username=user.username,
+                password=user.password
+            )
 
-        if self.thread.status == "active":
-            self.status_label.setText("🟢")
-            self.thread.start()
+            self.thread.msg.connect(self.thread_state_change)
+            self.thread_state_change()
+
+            if self.thread.status == "active":
+                self.status_label.setText("🟢")
+                self.thread.start()
+
+        except Exception as e:
+            logging.error(f"모니터링 시작 실패: {e}")
+            self.status_label.setText("🔴")
 
     def thread_state_change(self):
         if self.thread.message.status == "ready":
@@ -138,6 +127,11 @@ class App:
 
         self.login_dialog.login_toggle() # 계정정보 있으면 로그인 시도
 
+        self.quit_app_scheduler(
+            config.SESSION_CONFIG.QUIT_APP_HOUR,
+            config.SESSION_CONFIG.QUIT_APP_MINUTE)
+
+
         sys.exit(self.app.exec())
 
     def handle_tray_icon_activated(self, reason):
@@ -145,18 +139,22 @@ class App:
             self.login_dialog.show()
 
     def quit_app(self):
+        if hasattr(self.login_dialog, 'thread') and self.login_dialog.thread:
+            self.login_dialog.thread.stop()
         self.tray_icon.hide()
         self.app.quit()
 
-    # def login_state_change(self):
-    #     if self.login_dialog.thread.status == "work":
-    #         self.login_dialog.status_label.setText("🟢")
-    #         self.tray_icon.setIcon(QIcon("assets/icon.png"))
-    #         toast.success('프로그램 시작', '메일 감지가 시작됩니다..')
-    #     else:
-    #         self.login_dialog.status_label.setText("🔴")
-    #         self.tray_icon.setIcon(QIcon("assets/fail.png"))
-    #         toast.warn('프로그램 종료', '메일 감지가 중지되었습니다..')
+    def quit_app_scheduler(self, hour, minute):
+        now = QDateTime.currentDateTime()
+        target = QDateTime(now.date(), QTime(hour, minute))
+
+        # 이미 지났다면 다음날 18시로 설정
+        if now > target:
+            target = target.addDays(1)
+
+        ms_until_target = now.msecsTo(target)
+        QTimer.singleShot(ms_until_target, QApplication.quit)
+
 
 
 if __name__ == "__main__":

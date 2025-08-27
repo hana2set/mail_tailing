@@ -1,3 +1,5 @@
+import logging
+
 from pydantic import BaseModel
 
 # config.json 호출
@@ -13,12 +15,13 @@ class SessionConfig(BaseModel):
     TOAST_MAIL_DURATION_SEC: int
     TOAST_SUCCESS_DURATION_SEC: int
     TOAST_WARN_DURATION_SEC: int
+    QUIT_APP_HOUR: int
+    QUIT_APP_MINUTE: int
 
 class AppConfig(BaseModel):
     URL: str
     END_POINT: EndPointConfig
     SESSION_CONFIG: SessionConfig
-
 
 
 def load_config(path: str = "config.json") -> AppConfig:

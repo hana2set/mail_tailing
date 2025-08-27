@@ -47,7 +47,8 @@ class SessionThread(QThread):
 
     def run(self):
         logging.debug("thread 시작..")
-        self.monitor() #최초 1회 직접 실행
+        # self.monitor() #최초 1회 직접 실행
+        self.get_new_email() #기존 메일 리스트 입력
         self.timer.start(config.SESSION_CONFIG.AUTO_REFRESH_INTERVAL_SEC)
         self.exec_()  # 타이머 실행 대기
 
@@ -99,6 +100,6 @@ class SessionThread(QThread):
                 if len(new_mails) > 0:
                     self.message = ToastRequest("work", f"신규 메일 {len(new_mails)} 건", f"제목: {new_mails[0]["emailTitle"]}")
             except Exception as e:
-                self.message = ToastRequest("error", "에러가 발생하여 모니터링이 종료됩니다.", f"에러: {e}")
+                # self.message = ToastRequest("error", "에러가 발생하여 모니터링이 종료됩니다.", f"에러: {e}")
                 self.status = "error"
                 self.stop()
