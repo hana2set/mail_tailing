@@ -18,7 +18,7 @@ def init_driver():
     chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
     chrome_options.add_argument("--disable-extensions")  # 확장 프로그램 비활성화
     chrome_options.add_argument("--disable-dev-shm-usage")  # 공유 메모리 비활성
-    chrome_options.addArguments("--disable-automation")  # 자동화된 테스트 소프트웨어에 의해 제어되고 있다는 메세지 제거
+    chrome_options.add_argument("--disable-automation")  # 자동화된 테스트 소프트웨어에 의해 제어되고 있다는 메세지 제거
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # 자동화 도구 방지
     chrome_options.add_argument("--disable-infobars")
     chrome_options.add_experimental_option("detach", True)
