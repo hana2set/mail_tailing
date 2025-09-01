@@ -7,21 +7,15 @@ from config import config
 from toast import toast
 from session_thread import SessionThread
 
-from PyQt6.QtWidgets import (
-    QSystemTrayIcon, QMenu, QDialog, QApplication
-)
+from PyQt6.QtWidgets import QSystemTrayIcon, QMenu, QDialog, QApplication
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import QTimer, QTime, QDateTime
 from PyQt6.uic import loadUi
 
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.DEBUG,
-    handlers=[
-        logging.FileHandler('log.txt'),
-        logging.StreamHandler()
-    ]
-)
+from web_util import open_web_mail
+
+logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG, handlers=[logging.FileHandler("log.txt"), logging.StreamHandler()])
+
 
 class LoginDialog(QDialog):
 
@@ -31,7 +25,7 @@ class LoginDialog(QDialog):
         loadUi("ui/login.ui", self)
 
         self.logged_in = False
-        self.thread:SessionThread
+        self.thread: SessionThread
         self.setWindowIcon(QIcon("assets/icon.png"))
 
         user = User.get_default_user()
@@ -68,13 +62,7 @@ class LoginDialog(QDialog):
     def run_monitor(self, user):
 
         try:
-            self.thread = SessionThread(
-                login_url=config.URL + config.END_POINT.LOGIN,
-                logout_url=config.URL + config.END_POINT.LOGOUT,
-                data_url=config.URL + config.END_POINT.MAIL_LIST + '?currentPage=1&viewRowCnt=' + '10' + '&sortField=RECEIVE_DT&sortType=DESC',
-                username=user.username,
-                password=user.password
-            )
+            self.thread = SessionThread(username=user.username, password=user.password)
 
             self.thread.msg.connect(self.thread_state_change)
             self.thread_state_change()
@@ -111,13 +99,16 @@ class App:
         self.tray_icon.setVisible(True)
 
         tray_menu = QMenu()
-        show_action = QAction("Show Login")
+        show_action = QAction("Login")
+        web_action = QAction("Open Web")
         quit_action = QAction("Exit")
 
         show_action.triggered.connect(self.login_dialog.show)
+        web_action.triggered.connect(self.open_mail)
         quit_action.triggered.connect(self.quit_app)
 
         tray_menu.addAction(show_action)
+        tray_menu.addAction(web_action)
         tray_menu.addSeparator()
         tray_menu.addAction(quit_action)
 
@@ -125,12 +116,9 @@ class App:
         self.tray_icon.activated.connect(self.handle_tray_icon_activated)
         # 트레이 아이콘 end
 
-        self.login_dialog.login_toggle() # 계정정보 있으면 로그인 시도
+        self.login_dialog.login_toggle()  # 계정정보 있으면 로그인 시도
 
-        self.quit_app_scheduler(
-            config.SESSION_CONFIG.QUIT_APP_HOUR,
-            config.SESSION_CONFIG.QUIT_APP_MINUTE)
-
+        self.quit_app_scheduler(config.SESSION_CONFIG.QUIT_APP_HOUR, config.SESSION_CONFIG.QUIT_APP_MINUTE)
 
         sys.exit(self.app.exec())
 
@@ -139,10 +127,13 @@ class App:
             self.login_dialog.show()
 
     def quit_app(self):
-        if hasattr(self.login_dialog, 'thread') and self.login_dialog.thread:
+        if hasattr(self.login_dialog, "thread") and self.login_dialog.thread:
             self.login_dialog.thread.stop()
         self.tray_icon.hide()
         self.app.quit()
+
+    def open_mail(self):
+        open_web_mail()
 
     def quit_app_scheduler(self, hour, minute):
         now = QDateTime.currentDateTime()
@@ -154,7 +145,6 @@ class App:
 
         ms_until_target = now.msecsTo(target)
         QTimer.singleShot(ms_until_target, QApplication.quit)
-
 
 
 if __name__ == "__main__":

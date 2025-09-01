@@ -1,12 +1,13 @@
 import logging
-import webbrowser
 
 from PyQt6.QtCore import Qt
 from pyqttoast import Toast as _Toast, ToastPreset
 
 from config import config
+from web_util import open_web_mail
 
 _Toast.setMaximumOnScreen(5)
+
 
 class Toast:
     def mail_info(self, title, message):
@@ -40,10 +41,13 @@ class Toast:
         logging.warning(title)
         logging.warning(message)
 
-    def open_email(self, e, _toast:_Toast):
+    def open_email(self, e, _toast: _Toast):
         if e.button() == Qt.MouseButton.LeftButton:
-            webbrowser.open(config.URL + config.END_POINT.MAIL)
-        _toast.close()
+            # 창 닫기
+            _toast.close()
+
+            # 웹메일 페이지 띄우기
+            open_web_mail()
 
 
 toast = Toast()
