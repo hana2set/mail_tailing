@@ -132,10 +132,12 @@ class App:
         self.tray_icon.hide()
         self.app.quit()
 
-    def open_mail(self):
+    @staticmethod
+    def open_mail():
         open_web_mail()
 
-    def quit_app_scheduler(self, hour, minute):
+    @staticmethod
+    def quit_app_scheduler(hour, minute):
         now = QDateTime.currentDateTime()
         target = QDateTime(now.date(), QTime(hour, minute))
 
@@ -148,4 +150,7 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
+    try:
+        app = App()
+    except Exception:
+        logging.exception("message")
