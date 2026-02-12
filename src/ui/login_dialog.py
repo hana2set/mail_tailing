@@ -7,8 +7,10 @@ from src.models.user import User
 from src.ui.toast_manager import ToastManager
 from src.services.mail_service import MailService  # 새로 만든 서비스
 
+from src.utils.paths import BASE_DIR
+from src.utils.paths import PROJECT_ROOT
+
 toast = ToastManager()
-BASE_DIR = Path(__file__).resolve().parent
 
 
 class LoginDialog(QDialog):
@@ -16,17 +18,20 @@ class LoginDialog(QDialog):
     def __init__(self, service: MailService):
         super().__init__()
 
-        loadUi("src/ui/files/login.ui", self)
+        loadUi(BASE_DIR / "ui/files/login.ui", self)
 
         self.service = service
-        self.setWindowIcon(QIcon("assets/icon.png"))
+        self.setWindowIcon(QIcon(str(PROJECT_ROOT / "assets/icon.png")))
 
         user = User.load()
         if user:
             self.id.setText(user.username)
             self.password.setText(user.password)
 
+        # UI 액션
         self.login_button.clicked.connect(self.toggle_login)
+
+        # 상태 변경
         self.service.login_status_changed.connect(self.update_ui_state)
 
     def toggle_login(self):

@@ -1,20 +1,21 @@
 import sys
 import logging
 
-from ui.login_dialog import LoginDialog
+from src.ui.login_dialog import LoginDialog
 
-from config import config
+from src.config import config
 from src.ui.toast_manager import ToastManager
 
 from PyQt6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtCore import QTimer, QTime, QDateTime, QObject
 from src.services.mail_service import MailService  # 새로 만든 서비스
+from src.utils.paths import PROJECT_ROOT
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     level=logging.DEBUG,
-    handlers=[logging.FileHandler("../log.txt"), logging.StreamHandler()],
+    handlers=[logging.FileHandler("log.txt", encoding="utf-8"), logging.StreamHandler()],
 )
 
 toast = ToastManager()
@@ -34,10 +35,11 @@ class App(QObject):
         self.login_dialog = LoginDialog(self.mail_service)
 
         # 3. 트레이 아이콘
+        self.tray_icon = None
         self.setup_tray()
 
     def setup_tray(self):
-        self.tray_icon = QSystemTrayIcon(QIcon("assets/icon.png"))
+        self.tray_icon = QSystemTrayIcon(QIcon(str(PROJECT_ROOT / "assets/icon.png")))
         self.tray_icon.setToolTip("메일 모니터링")
 
         menu = QMenu()
@@ -108,6 +110,5 @@ if __name__ == "__main__":
         app_instance = App()
         exit_code = app_instance.run()
         sys.exit(exit_code)
-
     except Exception:
         logging.exception("치명적 오류 발생")

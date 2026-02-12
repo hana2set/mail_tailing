@@ -2,6 +2,8 @@ import logging
 
 from pydantic import BaseModel
 
+from src.utils.paths import PROJECT_ROOT
+
 
 # config.json 호출
 class EndPointConfig(BaseModel):
@@ -30,7 +32,7 @@ class AppConfig(BaseModel):
 def load_config(path: str = "data/config.json") -> AppConfig:
     import json
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(PROJECT_ROOT / path, "r", encoding="utf-8") as f:
         data = json.load(f)
     return AppConfig(**data)
 

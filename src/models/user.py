@@ -1,8 +1,9 @@
 import json
-from pathlib import Path
 from dataclasses import dataclass, asdict
 
-USER_INFO = Path("data/user.json")
+from src.utils.paths import PROJECT_ROOT
+
+USER_INFO = PROJECT_ROOT / "data/user.json"
 
 
 @dataclass(frozen=True)
