@@ -43,7 +43,7 @@ class BrowserManager:
 
             # Chrome 옵션 설정
             # request -> selenium
-            self.driver.get(config.URL + config.END_POINT.INDEX)    # 로그인 화면 진입
+            self.driver.get(config.URL + config.END_POINT.INDEX)  # 로그인 화면 진입
             cookie_name = "JSESSIONID"
             self.driver.delete_cookie(cookie_name)
             self.driver.add_cookie(
@@ -53,7 +53,7 @@ class BrowserManager:
                     "domain": config.URL.split("://")[1],
                 }
             )
-            self.driver.get(config.URL + config.END_POINT.MAIL)     # 메일 화면 진입
+            self.driver.get(config.URL + config.END_POINT.MAIL)  # 메일 화면 진입
 
         except Exception as e:
             logging.error(f"브라우저 열기 실패: {e}")

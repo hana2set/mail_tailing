@@ -3,7 +3,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 from src.services.session_manager import SessionManager
 from src.services.session_thread import SessionThread
-from src.utils.web_util import BrowserManager
+from src.utils.browser_manager import BrowserManager
 from src.models.user import User
 
 
