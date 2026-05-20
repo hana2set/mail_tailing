@@ -56,8 +56,8 @@ class LoginDialog(QDialog):
             # self.logged_in = True
             # self.login_button.setText("로그아웃")
 
-    def update_ui_state(self, is_logged_in):
-        if is_logged_in:
+    def update_ui_state(self):
+        if self.service.is_logged_in():
             self.status_label.setText("🟢")
             self.login_button.setText("로그아웃")
         else:

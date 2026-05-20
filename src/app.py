@@ -69,7 +69,7 @@ class App(QObject):
             self.login_dialog.show()
 
         # 스케쥴러
-        quit_app_scheduler(config.SESSION_CONFIG.QUIT_APP_HOUR, config.SESSION_CONFIG.QUIT_APP_MINUTE)
+        self.quit_app_scheduler(config.SESSION_CONFIG.QUIT_APP_HOUR, config.SESSION_CONFIG.QUIT_APP_MINUTE)
 
         logging.info("Application started")
         return self.app.exec()
@@ -92,17 +92,16 @@ class App(QObject):
         self.tray_icon.hide()
         self.app.quit()
 
+    def quit_app_scheduler(self, hour, minute):
+        now = QDateTime.currentDateTime()
+        target = QDateTime(now.date(), QTime(hour, minute))
 
-def quit_app_scheduler(hour, minute):
-    now = QDateTime.currentDateTime()
-    target = QDateTime(now.date(), QTime(hour, minute))
+        # 이미 지났다면 다음날 18시로 설정
+        if now > target:
+            target = target.addDays(1)
 
-    # 이미 지났다면 다음날 18시로 설정
-    if now > target:
-        target = target.addDays(1)
-
-    ms_until_target = now.msecsTo(target)
-    QTimer.singleShot(ms_until_target, QApplication.quit)
+        ms_until_target = now.msecsTo(target)
+        QTimer.singleShot(ms_until_target, self.quit_app)
 
 
 if __name__ == "__main__":
