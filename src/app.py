@@ -2,6 +2,7 @@ import sys
 import logging
 
 from src.ui.login_dialog import LoginDialog
+from src.ui.settings_dialog import SettingsDialog
 
 from src.config import config
 from src.ui.toast_manager import ToastManager
@@ -33,6 +34,7 @@ class App(QObject):
 
         # 2. UI 생성
         self.login_dialog = LoginDialog(self.mail_service)
+        self.settings_dialog = None
 
         # 3. 트레이 아이콘
         self.tray_icon = None
@@ -43,22 +45,36 @@ class App(QObject):
         self.tray_icon.setToolTip("메일 모니터링")
 
         menu = QMenu()
-        show_action = QAction("Login", menu)
-        web_action = QAction("Open Web", menu)
-        quit_action = QAction("Exit", menu)
+        show_action = QAction("로그인", menu)
+        web_action = QAction("웹 메일 열기", menu)
+        settings_action = QAction("설정", menu)
+        quit_action = QAction("종료", menu)
 
         menu.addAction(show_action)
         menu.addAction(web_action)
+        menu.addAction(settings_action)
         menu.addSeparator()
         menu.addAction(quit_action)
 
         # 이벤트
         show_action.triggered.connect(self.login_dialog.show)
         web_action.triggered.connect(self.mail_service.open_browser)
+        settings_action.triggered.connect(self.show_settings)
         quit_action.triggered.connect(self.quit_app)
 
         self.tray_icon.setContextMenu(menu)
         self.tray_icon.activated.connect(self.handle_tray_click)
+
+    def show_settings(self):
+        if self.settings_dialog is None:
+            self.settings_dialog = SettingsDialog()
+            self.settings_dialog.finished.connect(self._settings_closed)
+        self.settings_dialog.show()
+        self.settings_dialog.raise_()
+        self.settings_dialog.activateWindow()
+
+    def _settings_closed(self, _result):
+        self.settings_dialog = None
 
     def run(self):
         # 기본 화면

@@ -34,7 +34,7 @@ class BrowserManager:
             # chromedriver 서비스 종료되지 않는 현상 제거
             if self.driver is not None:
                 try:
-                    self.driver.quit()
+                    self.driver.service.stop()
                 except Exception as e:
                     logging.error(e)
                     raise AssertionError("기존 브라우저 종료에 실패했습니다.")
@@ -55,5 +55,10 @@ class BrowserManager:
             )
             self.driver.get(config.URL + config.END_POINT.MAIL)  # 메일 화면 진입
 
+            self.driver.service.stop() # 웹브라우저와 연결끊기
+
         except Exception as e:
             logging.error(f"브라우저 열기 실패: {e}")
+
+    def stop(self):
+        self.driver.quit()
